@@ -1,28 +1,19 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
-
-get_ipython().system('awk \'$0 !~/#/ {print $3 "\\t" $4 "\\t" $7}\' groups_bigger_than_10.txt > Mjav_values_kaks.txt')
-
-
-# In[3]:
-
-
 import pandas as pd
 
-## Treat the file collinearity first: less Mare4-kaks.txt |grep -v '#' |perl -ne 'chomp;@p=split(/:/,$_);print "$p[1]\n"' |awk '{print $1 "\t" $2 "\t" $5}' > Mare_values_kaks.txt
 ## The input files are from the McScanX analysis
+## 
 
 # Open gff file
-gff_file_path = 'Mjav-c.gff'
+gff_file_path = 'species.gff'
 
 # Define the column names for the GFF file
 column_gff = ['contig', 'gene', 'start', 'end']
 
 # Open the ks file
-col_file = 'Mjav_values_kaks.txt'
+col_file = 'species_values_kaks.txt'
 
 # Define the column names for the collinearity file
 column_col = ['gene1', 'gene2', 'ks']
@@ -40,82 +31,34 @@ filtered_groups = []
 #For each gene in the gff which is present more than 3 time in the collinearity file, print all the match in the same line 
 for gene_name in df_gff['gene'].unique():
     # Count occurrences of the gene in the other DataFrame
-    #count = df_col[df_col['gene1'] == gene_name].shape[0] # If I check the genes only in the first column I do not retrieve all of them
+    
     count = df_col[(df_col['gene1'] == gene_name) | (df_col['gene2'] == gene_name)].shape[0]
-    if count >= 3: #I changed from == to >= because I was loosing some genes
+    if count >= 3: 
         matching_genes = df_col[df_col['gene1'] == gene_name]['gene2'].tolist()
         result_string = " ".join([str(item)for item in matching_genes])
         tmp_genes = [gene_name]
         tmp_list = [gene_name]+matching_genes # Create a list of a list
         file_list = file_list+[tmp_genes] # Increment the list of genes
         file_groups = file_groups+[tmp_list] # Increment the list file each loop        
-        filtered_groups = [row for row in file_groups if len(row) == 4]  ## Filter accordling to the ploidy of the species being analyzed (4 for Mare/Mjav)
+        filtered_groups = [row for row in file_groups if len(row) == 4]  ## Filter accordling to the ploidy of the species being analyzed (4 for tetraploid species/3 for triploid)
 
 df = pd.DataFrame(file_groups)  # Put the list file into a DataFrame      
 df1 = pd.DataFrame(file_list)
 df3 = pd.DataFrame(filtered_groups)
 
-#df.head()     #print only the five first lines  
-#df1.head()        
-
-
-# In[4]:
-
-
 len(df3. index)
 
-
-# In[5]:
-
-
-df3.head()
-
-
-# In[9]:
-
-
-df1.columns = ["gene"]
-
-
-# In[6]:
-
-
-#len(df1. index)
 len(df. index)
 
 
-# In[7]:
-
-
+##Create file with all genes from each contig belonging to each block 
 ## File to be used later on the loops to retrieve gene1 gene2 ks_values
-df3.to_csv('result_genes_in_groups.csv', sep='\t', index=False, header=False) # to save the DataFrame into a csv file
+df3.to_csv('result_genes_in_groups.csv', sep='\t', index=False, header=False) 
 
 
-# In[11]:
+# Save a list of genes in blocks
 
-
-df1.to_csv('list_uniq_genes_within_blocks.csv', sep='\t', index=False, header=True) # to save the DataFrame into a csv file
-
-
-# In[12]:
-
-
-get_ipython().system('wc list_uniq_genes_within_blocks.csv')
-
-
-# In[13]:
-
-
-df1.head()
-
-
-# In[20]:
-
-
-df.head()
-
-
-# In[8]:
+df1.to_csv('list_uniq_genes_within_blocks.csv', sep='\t', index=False, header=True) 
 
 
 ## This part will use the file with all the ks values and the second file with the name of all genes to produce all the pairs
@@ -124,9 +67,9 @@ df.head()
 D={}
 
 #
-colinearity_size = 4
+colinearity_size = 4 ##change according to ploidy
 
-with open('Mjav_values_kaks.txt', 'r') as lines_handle:
+with open('species_values_kaks.txt', 'r') as lines_handle:
     for line in lines_handle:
         L = line.rstrip().split("\t")
         gene1 = L[0]
@@ -150,7 +93,7 @@ with open('result_genes_in_groups.csv', 'r') as lines_handle:
                 while k < colinearity_size:
                     if L[k] not in D[L[i]]:
                         ks_pairs.write(L[i] + "\t" + L[k] + "\t" + "NA" + "\n")
-                    elif D[L[i]][L[k]] == "-2":
+                    elif D[L[i]][L[k]] == "-2":  ## To eliminate values -2 in the ks columns
                         ks_pairs.write(L[i] + "\t" + L[k] + "\t" + "NA" + "\n")
                     elif float(D[L[i]][L[k]]) > 1:  ## To eliminate values of ks bigger than 1
                         ks_pairs.write(L[i] + "\t" + L[k] + "\t" + "NA" + "\n")    
@@ -160,13 +103,6 @@ with open('result_genes_in_groups.csv', 'r') as lines_handle:
                 i += 1
 
 ks_pairs.close()
-
-
-    
-
-
-# In[9]:
-
 
 ##This part will produce a list of groups and their correspondence in the file "ks". 
 
@@ -206,19 +142,10 @@ blocks_file.close()
 
 ### so to sort uniq this file, I used the script in awk "verify_repeated_columns.txt"
 
-
-
-# In[10]:
-
-
-#This code will generate one directory for each groups from the file produced above "blocks_from_code.txt"
+#This code will generate one directory for each block from the file produced above "blocks_from_code.txt"
 
 import sys
 import os
-
-#if len(sys.argv) < 3:
-#    print("Usage: python script.py <res_file> <filename>")
-#    sys.exit(1)
 
 res_filename = 'ks_pairs.txt'
 filename = 'blocks_from_code.txt'
@@ -245,7 +172,7 @@ with open(filename, 'r') as infile:
                     outfile.write(f"{divs[loc + k]}\n")
 
 
-# In[13]:
+# For each directory (corresponding to each synteny block), disconsider the name of genes, and print only the number of contigs, and the ks values
 
 
 from __future__ import print_function
@@ -281,13 +208,14 @@ for directory in list_of_directories:
                 output_file.write(result_string)
 
 
-# In[14]:
+# Create a file with all the directories and results.txt files
 
 
 get_ipython().system('ls -d BLOCK_*/result.txt > list_files.txt')
 
 
-# In[15]:
+# For each directory, create a file with the ks values for each pair of contigs, and calculate the median for each contig pair
+# For triploid species, the final final will be composed of three lines, for tetraploid species, 6 lines
 
 
 import pandas as pd
@@ -330,7 +258,7 @@ for filename in filelist[0]:
 
 
 
-# In[16]:
+# Select blocks where only the right number of lines is present (three or six, for example), this threshold is important to select only "perfect" synteny relations, to better assign the subgenomes
 
 
 from __future__ import print_function
@@ -363,13 +291,13 @@ df_result = pd.concat(result).rename(columns={'V1':'contigs', 'V2':'ks'})
 
 
 
-# In[17]:
+# Save the file
 
 
 df_result.to_csv('Mjav_block_def.tsv', sep='\t', index=False)
 
 
-# In[ ]:
+# Use this file as input for genome structure 
 
 
 
