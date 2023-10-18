@@ -1,7 +1,13 @@
 #!/usr/bin/env python
-# coding: utf-8
+
 
 import pandas as pd
+import sys
+import re
+import sys
+import os
+import glob
+from __future__ import print_function
 
 ## The input files are from the McScanX analysis
 ## 
@@ -106,8 +112,7 @@ ks_pairs.close()
 
 ##This part will produce a list of groups and their correspondence in the file "ks". 
 
-import sys
-import re
+
 
 filename = 'result_genes_in_groups.csv' ## The file is the one produced by the first step (df3)
 
@@ -144,8 +149,7 @@ blocks_file.close()
 
 #This code will generate one directory for each block from the file produced above "blocks_from_code.txt"
 
-import sys
-import os
+
 
 res_filename = 'ks_pairs.txt'
 filename = 'blocks_from_code.txt'
@@ -175,11 +179,7 @@ with open(filename, 'r') as infile:
 # For each directory (corresponding to each synteny block), disconsider the name of genes, and print only the number of contigs, and the ks values
 
 
-from __future__ import print_function
-import glob
-import os
-import re
-import pandas as pd
+
 
 list_of_directories = glob.glob('/Users/azotta/DocumentsLocal/JupyterNotebooks/MeloidogyneGenomes/SeparateGenomes/Mjav/BLOCK_*/')
 
@@ -218,11 +218,7 @@ get_ipython().system('ls -d BLOCK_*/result.txt > list_files.txt')
 # For triploid species, the final final will be composed of three lines, for tetraploid species, 6 lines
 
 
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import scipy
-import os
+
 
 # Set working directory
 os.chdir("/Users/azotta/DocumentsLocal/JupyterNotebooks/MeloidogyneGenomes/SeparateGenomes/Mjav/")
@@ -261,11 +257,7 @@ for filename in filelist[0]:
 # Select blocks where only the right number of lines is present (three or six, for example), this threshold is important to select only "perfect" synteny relations, to better assign the subgenomes
 
 
-from __future__ import print_function
-import glob
-import os
-import re
-import pandas as pd
+
 
 list_of_files = sorted(glob.glob('/Users/azotta/DocumentsLocal/JupyterNotebooks/MeloidogyneGenomes/SeparateGenomes/Mjav/BLOCK_*/result_medians.csv'))
 
