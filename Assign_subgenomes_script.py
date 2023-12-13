@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+## Authors: Ana Zotta and Georgios D Koutsovoulos
 
 import pandas as pd
 import sys
